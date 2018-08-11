@@ -46,7 +46,7 @@
         </template>
       </ext-item>
     </div>
-    
+
     <!-- 设置扩展图标排序 -->
     <div class="list">
       <h1>{{i18n.rankName}}</h1>
@@ -75,14 +75,14 @@
       <switch-btn data-key="right_more"></switch-btn>
       <p class="describe">{{i18n.rightMoreDesc}}</p>
     </div>
-    
+
     <!-- 是否显示角标 -->
     <div class="list">
       <h1>{{i18n.showBadgeName}}</h1>
       <switch-btn data-key="show_badge"></switch-btn>
       <p class="describe">{{i18n.showBadgeDesc}}</p>
     </div>
-    
+
     <!-- 是否显示扩展名称 -->
     <div class="list">
       <h1>{{i18n.showExtName}}</h1>
@@ -198,9 +198,9 @@ export default {
 
       let that = this
       setTimeout(() => {
-        var newName = prompt(this.i18n.optionGroupModifyName) || 'New Group'
+        let obj = this.group.list[index];
+        var newName = prompt(this.i18n.optionGroupModifyName,obj.name) || 'New Group'
         if (newName.trim()) {
-          let obj = this.group.list[index]
           obj.name = newName
           this.group.list.splice(index, 1, obj)
         }
@@ -208,7 +208,7 @@ export default {
     },
     deleteGroup(index) {
       this.groupIndex = index
-      
+
       let that = this
       setTimeout(() => {
         if (confirm(this.i18n.optionGroupDelete)) {
