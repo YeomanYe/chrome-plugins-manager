@@ -58,6 +58,8 @@ import * as Extension from "./lib/extension"
 import * as Util from "./lib/util"
 import * as Rank from "./lib/rank"
 
+Extension.getAll({onlyDev:true}).then((res)=>console.log('DEV',res));
+Extension.getAll({onlyApp:true}).then((res)=>console.log('APP',res));
 export default {
   data() {
     return {
@@ -215,21 +217,8 @@ export default {
       }
 
       // [Init]增加分组功能，兼容老版本问题
-      let oldLockObj = Storage.get('_lockList_')
-      let group = Storage.get('_group_')
-      if (!group) {
-        group = {
-          list: [
-            {
-              'name': this.i18n.defaultGroupName,
-              'lock': oldLockObj || {}
-            }
-          ]
-        }
-        Storage.set('_group_', group)
-        Storage.remove('_lockList_')
-      }
-      this.group = group
+      let oldLockObj = Storage.get('_lockList_');
+
       this.groupIndex = Number.parseInt(localStorage.getItem("_groupIndex_")) || 0
 
       // 排序方法初始化
@@ -240,6 +229,35 @@ export default {
         if (res && res.length === 0) {
           this.ext.allEmpty = true
         } else {
+          let group = Storage.get('_group_')
+          if (!group) {
+            let allExt = res;
+            let allLockObj = {},appLockObj = {},devLockObj = {};
+            allExt.forEach(item=>{
+              allLockObj[item.id] = 1;
+              if(item.showType === 'APP') appLockObj[item.id] = 1;
+              else if(item.showType === 'DEV')devLockObj[item.id] = 1;
+            });
+            console.log(allExt);
+            console.log('oldLockObj',allLockObj);
+            group = {
+              list: [
+                {
+                  'name': this.i18n.defaultGroupName,
+                  'lock': allLockObj
+                }, {
+                  'name': 'APP',
+                  'lock': appLockObj
+                },{
+                  'name': 'DEV',
+                  'lock': devLockObj
+                }
+              ]
+            }
+            Storage.set('_group_', group)
+            Storage.remove('_lockList_')
+          }
+          this.group = group;
           this.ext.extList = res
         }
         Extension.addIconBadge()

@@ -146,12 +146,12 @@ function showMenu(item) {
           disabled: false
         })
       }
-  
+
       let position = getPositionByExt(item, {
         width: RightMenuWidth,
         height: 52
       })
-  
+
       vm.rightMenu = {
         showClass: position.atLeft ? 'showInfoLeft' : 'showInfoRight',
         left: position.left,
@@ -172,7 +172,43 @@ function hideMenu() {
   vm.rightMenu.showClass = ''
 }
 
+/**
+ * 通过对象来找到数组
+ * @param arr
+ * @param obj
+ * @returns {Array}
+ */
+function findArrWithObj(arr,obj) {
+  let retArr = [];
+  arr = arr instanceof Array ? arr : [];
+  let keys = Object.keys(obj);
+  for(let item of arr){
+    let isEqual = true;
+    for(let key of keys){
+      if(!compare(obj[key],item[key])) {
+        isEqual = false;
+        break;
+      }
+    }
+    if(isEqual) retArr.push(item);
+  }
+  return retArr;
+}
 
+/**
+ * 比较两个对象是否相等
+ * @param origin
+ * @param target
+ * @returns {boolean}
+ */
+function compare(origin,target) {
+  if (typeof origin === 'object')    {
+    if (typeof target !== 'object') return false
+    for (let key of Object.keys(origin))
+      if (!compare(target[key], origin[key])) return false
+    return true
+  } else return target === origin
+}
 
 /**
  * 显示扩展名称
@@ -184,12 +220,12 @@ function showName(item) {
     setTimeout(() => {
       let ele = document.querySelector('#extName')
       item.showMaxWidth = Math.max(RightMenuWidth, ele.offsetWidth)
-  
+
       let position = getPositionByExt(item, {
         width: ele.offsetWidth,
         height: ele.offsetHeight
       })
-      
+
       vm.extName = {
         showClass: position.atLeft ? 'showInfoLeft' : 'showInfoRight',
         left: position.left,
@@ -217,7 +253,7 @@ function hideName() {
  * 初始化页面所有的操作
  */
 function resetHandle(params) {
-  
+
   // 关闭右键菜单
   hideMenu()
   hideName()
@@ -296,7 +332,7 @@ function cancelSearch() {
 function onoff(item) {
   // 防止Hover延迟在点击后生效
   clearTimeout(item['hoverTimer'])
-  
+
   Extension.onoff(item)
   resetHandle()
 }
@@ -348,6 +384,7 @@ export {
   enter,
   leave,
   showName,
+  findArrWithObj,
   search,
   onoff,
   clear,
@@ -355,5 +392,5 @@ export {
   showGroup,
   hideGroup,
   changeGroup,
-  setGroup 
+  setGroup
 }

@@ -33,8 +33,8 @@
       <ul class="group-list gclearfix">
         <li v-for="(item, index) in group.list" :class="index === groupIndex ? 'cur' : ''" @click="selectGroup(index)">
           {{item.name}}
-          <i class="group-del" @click.stop="deleteGroup(index)"></i>
-          <i class="group-mod" @click.stop="modifyGroup(index)"></i>
+          <i :hidden="index < 3" class="group-del" @click.stop="deleteGroup(index)"></i>
+          <i :hidden="index < 3" class="group-mod" @click.stop="modifyGroup(index)"></i>
         </li>
         <li class="group-add" @click="addGroup">
           <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M939.939489 459.072557 562.339502 459.072557 562.339502 83.519182 462.055494 83.519182 462.055494 459.072557 84.455507 459.072557 84.455507 559.356564 462.055494 559.356564 462.055494 939.003164 562.339502 939.003164 562.339502 559.356564 939.939489 559.356564Z" fill="#636363"></path></svg>
@@ -163,14 +163,32 @@ export default {
       return this.i18n.otherDesc.replace('<a>', `<a href="https://chrome.google.com/webstore/detail/extension-manager/gjldcdngmdknpinoemndlidpcabkggco/reviews?hl=${chrome.i18n.getUILanguage()}" target="_blank">`)
     },
     getAllExtList() {
-      return this.extList.map(item => {
-        if (this.group.list[this.groupIndex].lock[item.id]) {
-          item.isLocked = true
-        } else {
-          item.isLocked = false
-        }
-        return item
-      })
+      let retArr;
+      if(this.groupIndex === 1){
+        retArr = this.extList.filter(item => {
+          if (item.showType === 'APP') {
+            item.isLocked = true;
+            return item;
+          }
+        });
+      }else if(this.groupIndex === 2){
+        retArr = this.extList.filter(item => {
+          if (item.showType === 'DEV') {
+            item.isLocked = true;
+            return item;
+          }
+        });
+      }else{
+        retArr = this.extList.map(item => {
+          if (this.group.list[this.groupIndex].lock[item.id]) {
+            item.isLocked = true
+          } else {
+            item.isLocked = false
+          }
+          return item
+        })
+      }
+      return retArr;
     },
     getShowWindowSize() {
       const WindowSizeByColum = {
@@ -230,6 +248,7 @@ export default {
       this.groupIndex = index
     },
     extClick(item) {
+      if(this.groupIndex < 3) return;
       let listObj = this.group.list[this.groupIndex]
       if (item.isLocked) {
         delete listObj.lock[item.id]

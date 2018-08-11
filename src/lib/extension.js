@@ -1,3 +1,5 @@
+import {findArrWithObj} from './util'
+
 const Promise = require('bluebird')
 const Storage = require('./../lib/storage')
 const Rank = require('./rank')
@@ -7,8 +9,7 @@ const ExtDefaultIcon = './../assets/default-icon.png'
 const ExtDefaultColor = '#5c5e6f'
 
 // 储存扩展列表
-let allExtList = []
-
+let cacheExt = [];
 
 /**
  * [getColor 获取扩展图标的平均色值，用于扩展名称显示的底色]
@@ -125,50 +126,56 @@ function orderHandle(storage) {
 
 /**
  * 排除扩展，管理器本身以及主题、皮肤等
- * @param {*} all 
+ * @param {*} all
  */
 function processHandle(all, option) {
   let res = new Promise((resolve, reject) => {
     Storage.getAll().then(storage => {
-      
+
       // 区分生产及开发环境
       let details = chrome.app.getDetails() || {id: ""}
+      let extList = [];
+      let tmpList = findArrWithObj(cacheExt,{option});
+      if(tmpList[0]) extList = tmpList[0].extList;
+      if(extList.length === 0){
+        all.forEach(item => {
+          if (item.id !== details.id && item.type !== 'theme') {
 
-      all.forEach(item => {
-        if (item.id !== details.id && item.type !== 'theme') {
-          
-          // 处理显示图标
-          if (item.icons && item.icons.length > 0) {
-            item.showIcon = item.icons[item.icons.length - 1].url
-          }else{
-            item.showIcon = ExtDefaultIcon
+            // 处理显示图标
+            if (item.icons && item.icons.length > 0) {
+              item.showIcon = item.icons[item.icons.length - 1].url
+            }else{
+              item.showIcon = ExtDefaultIcon
+            }
+            item.showIconBg = `background-image:url('${item.showIcon}')`
+            item.showColor = ExtDefaultColor
+
+            // 判断是否为锁定图标
+            item.isLocked = false
+
+            // 判断是否为应用或开发版本
+            if (item.isApp) {
+              item.showType = 'APP'
+            } else if (item.installType === "development") {
+              item.showType = 'DEV'
+            }
+
+            // 是否处于hover状态
+            item.isHover = false
+
+            // 是否被搜索关键词命中
+            item.isSearched = false
+            if((option.onlyApp && item.showType !== 'APP') || (option.onlyDev && item.showType !== 'DEV')) return;
+            extList.push(item);
           }
-          item.showIconBg = `background-image:url('${item.showIcon}')`
-          item.showColor = ExtDefaultColor
+        })
+        cacheExt.push({option,extList});
+      }
 
-          // 判断是否为锁定图标
-          item.isLocked = false
-
-          // 判断是否为应用或开发版本
-          if (item.isApp) {
-            item.showType = 'APP'
-          } else if (item.installType === "development") {
-            item.showType = 'DEV'
-          }
-
-          // 是否处于hover状态
-          item.isHover = false
-
-          // 是否被搜索关键词命中
-          item.isSearched = false
-
-          allExtList.push(item)
-        }
-      })
-      resolve(allExtList)
+      resolve(extList)
       if (option.needColor) {
         setTimeout(() => {
-          allExtList.forEach(item => {
+          extList.forEach(item => {
             setTimeout(() => {
               getExtColor(item)
             }, 0)
@@ -188,12 +195,12 @@ function addIconBadge(){
   if(Storage.get("_switch_show_badge_") !== 'close'){
     // ChromeAPI的调用需要处理时间，并且是异步的
     setTimeout(() => {
-      let badgeList = allExtList.filter(item => {
+      let badgeList = extList.filter(item => {
         if (item.isLocked !== item.enabled) {
           return true
         }
       })
-  
+
       if(badgeList.length === 0){
         // 关闭清理动画
         if (window.vm) {
@@ -221,14 +228,12 @@ function addIconBadge(){
  */
 function getAll(option = {}) {
   let res = new Promise((resolve, reject) => {
-    allExtList = []
     chrome.management.getAll(function(obj){
       resolve(processHandle(obj, option))
     })
   })
   return res
 }
-
 
 /**
  * 启用或禁用扩展
@@ -273,8 +278,8 @@ function uninstall(item) {
   chrome.management.uninstall(item.id, () => {
     chrome.management.get(item.id, (res) => {
       if (!res) {
-        let index = allExtList.indexOf(item)
-        allExtList.splice(index, 1)
+        let index = extList.indexOf(item)
+        extList.splice(index, 1)
         addIconBadge()
       }
     })
@@ -286,7 +291,7 @@ function uninstall(item) {
  * 根据锁定状态，进行清理
  */
 function clear() {
-  allExtList.forEach(item => {
+  extList.forEach(item => {
     if (item.isLocked === !item.enabled) {
       onoff(item)
     }
