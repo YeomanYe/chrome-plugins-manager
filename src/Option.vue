@@ -199,7 +199,10 @@ export default {
       let that = this
       setTimeout(() => {
         let obj = this.group.list[index];
-        var newName = prompt(this.i18n.optionGroupModifyName,obj.name) || 'New Group'
+        let newName = prompt(this.i18n.optionGroupModifyName,obj.name);
+        if(!newName || (typeof newName === 'string' && newName.trim() === '')){
+          newName = obj.name || 'New Group';
+        }
         if (newName.trim()) {
           obj.name = newName
           this.group.list.splice(index, 1, obj)
