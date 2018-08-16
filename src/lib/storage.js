@@ -41,4 +41,13 @@ function set(key, value) {
 	chrome.storage.sync.set(storage, function(){});
 }
 
-export { getAll, remove, set, get }
+/**
+ * 设置全部的键值对
+ * @param data
+ */
+function setAll(data) {
+  storage = data;
+  chrome.storage.sync.set(data,()=>{});
+}
+
+export { getAll, remove, set, get , setAll }
