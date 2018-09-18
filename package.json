@@ -1,7 +1,7 @@
 {
-  "name": "Extension Manager (Chrome)",
+  "name": "ExtensionManager",
   "description": "Extension Manager (Chrome)",
-  "version": "8.x",
+  "version": "1.0.0",
   "author": "chevionlu@gmail.com",
   "license": "MIT",
   "private": true,
