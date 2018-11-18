@@ -149,7 +149,7 @@ function showMenu(item) {
 
       let position = getPositionByExt(item, {
         width: RightMenuWidth,
-        height: 52
+        height: 58
       })
 
       vm.rightMenu = {
@@ -345,10 +345,14 @@ function clear() {
 /**
  * 分组
  */
+let groupTimer = null
 function showGroup() {
-  vm.groupShow = true
+  groupTimer = setTimeout(() => {
+    vm.groupShow = true
+  }, 200)
 }
 function hideGroup() {
+  clearTimeout(groupTimer)
   vm.groupShow = false
 }
 function changeGroup(index) {
@@ -368,6 +372,7 @@ function changeGroup(index) {
       }
     })
     resetHandle()
+    chrome.browserAction.setBadgeText({text: ""})
   }, 50)
 }
 function setGroup() {

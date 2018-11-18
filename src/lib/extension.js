@@ -78,7 +78,7 @@ export function getExtColor(item) {
     if (substantialColor === 1000) {
       setTimeout(function () {
         item.showIcon = ExtDefaultIcon
-        item.showIconBg = `background-image:url('${ExtDefaultIcon}')`
+        item.showIconBg = `background-image:url('${ExtDefaultIcon}'); background-color:#fff;`
       }, 0)
       newColor = ExtDefaultColor
     }
@@ -168,6 +168,7 @@ function processHandle(all, option) {
             if((option.onlyApp && item.showType !== 'APP') || (option.onlyDev && item.showType !== 'DEV')) return;
             extList.push(item);
           }
+/*<<<<<<< HEAD
         })
         cacheExt.push({option,extList});
       }
@@ -182,6 +183,40 @@ function processHandle(all, option) {
           })
         }, 0)
       }
+=======*/
+          item.showIconBg = ""
+          item.showColor = ExtDefaultColor
+
+          // 判断是否为锁定图标
+          item.isLocked = false
+
+          // 判断是否为应用或开发版本
+          if (item.isApp) {
+            item.showType = 'APP'
+          } else if (item.installType === "development") {
+            item.showType = 'DEV'
+          }
+
+          // 是否处于hover状态
+          item.isHover = false
+
+          // 是否被搜索关键词命中
+          item.isSearched = false
+
+          allExtList.push(item)
+
+      })
+      resolve(allExtList)
+      allExtList.forEach(item => {
+        item.showIconBg = `background-image:url('${item.showIcon}'); background-color: #fff;`
+        if (option.needColor) {
+          setTimeout(() => {
+            getExtColor(item)
+          }, 100)
+        }
+      })
+      }
+// >>>>>>> upstream/master
     })
   })
   return res

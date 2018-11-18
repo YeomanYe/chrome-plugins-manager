@@ -55,6 +55,7 @@
     list-style: none;
     margin: 13px;
     border-radius: 2px;
+    background-color: #f8f8f8;
     background-size: 50px 50px;
     background-position: center;
     background-repeat: no-repeat;
