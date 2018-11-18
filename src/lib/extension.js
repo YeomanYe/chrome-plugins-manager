@@ -137,6 +137,8 @@ function processHandle(all, option) {
       let extList = [];
       let tmpList = findArrWithObj(cacheExt,{option});
       if(tmpList[0]) extList = tmpList[0].extList;
+      let allExtList = [];
+
       if(extList.length === 0){
         all.forEach(item => {
           if (item.id !== details.id && item.type !== 'theme') {
